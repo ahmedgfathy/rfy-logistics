@@ -1,0 +1,40 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# builds
+dist/
+build/
+*.tsbuildinfo
+
+# environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# uploads (customer documents must never be committed)
+backend/uploads/
+uploads/
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# prisma / db dumps
+*.sql.gz
+prisma/dev.db
+
+# editors / os
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# testing
+coverage/
+playwright-report/
