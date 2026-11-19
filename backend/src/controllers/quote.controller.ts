@@ -1,9 +1,7 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import type { Request, Response } from 'express';
 import { Prisma, type QuoteStatus } from '@prisma/client';
 import { prisma } from '../lib/prisma';
-import { env } from '../config/env';
+import { loadUpload, persistUpload, removeUpload } from '../lib/storage';
 import { ApiError } from '../middleware/error';
 import { currentUser } from '../middleware/auth';
 import { quoteReference } from '../utils/reference';
@@ -33,18 +31,21 @@ type QuotePayload = {
   locale: 'en' | 'ar';
 };
 
-async function cleanupUploads(files: Express.Multer.File[] | undefined): Promise<void> {
-  if (!files?.length) return;
-  await Promise.all(
-    files.map((file) => fs.unlink(file.path).catch(() => undefined)),
-  );
+async function cleanupUploads(storedNames: string[]): Promise<void> {
+  await Promise.all(storedNames.map((name) => removeUpload(name, 'quotes')));
 }
 
 export async function createQuote(req: Request, res: Response): Promise<void> {
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const payload = req.body as QuotePayload;
+  const storedNames: string[] = [];
 
   try {
+    // Persist first: the database must only ever reference files that exist.
+    for (const file of files) {
+      storedNames.push(await persistUpload(file, 'quotes'));
+    }
+
     let reference = quoteReference();
     let created;
 
@@ -73,13 +74,13 @@ export async function createQuote(req: Request, res: Response): Promise<void> {
             additionalNotes: payload.additionalNotes ?? null,
             locale: payload.locale,
             sourceIp: req.ip,
-            attachments: files.length
+            attachments: storedNames.length
               ? {
-                  create: files.map((file) => ({
-                    fileName: file.originalname.slice(0, 200),
-                    storedName: path.basename(file.path),
-                    mimeType: file.mimetype,
-                    sizeBytes: file.size,
+                  create: storedNames.map((storedName, index) => ({
+                    fileName: files[index].originalname.slice(0, 200),
+                    storedName,
+                    mimeType: files[index].mimetype,
+                    sizeBytes: files[index].size,
                   })),
                 }
               : undefined,
@@ -126,8 +127,8 @@ export async function createQuote(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error) {
-    // Never leave orphaned customer documents on disk.
-    await cleanupUploads(files);
+    // Never leave orphaned customer documents in Blob storage or on disk.
+    await cleanupUploads(storedNames);
     throw error;
   }
 }
@@ -227,12 +228,22 @@ export async function downloadAttachment(req: Request, res: Response): Promise<v
   });
   if (!attachment) throw ApiError.notFound('Attachment not found');
 
-  const absolute = path.join(env.UPLOAD_DIR, 'quotes', path.basename(attachment.storedName));
+  let upload;
   try {
-    await fs.access(absolute);
+    upload = await loadUpload(attachment.storedName, 'quotes');
   } catch {
     throw ApiError.notFound('The stored file is no longer available');
   }
 
-  res.download(absolute, attachment.fileName);
+  const safeName = attachment.fileName.replace(/["\r\n]/g, '_');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(attachment.fileName)}`,
+  );
+  if (upload.contentType) res.setHeader('Content-Type', upload.contentType);
+  upload.stream.on('error', () => {
+    if (!res.headersSent) res.status(500).end();
+    else res.end();
+  });
+  upload.stream.pipe(res);
 }

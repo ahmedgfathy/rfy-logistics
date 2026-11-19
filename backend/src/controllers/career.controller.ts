@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
 import type { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
+import { persistUpload, removeUpload } from '../lib/storage';
 import { parsePagination, paginationMeta } from '../utils/pagination';
 import { notifyAdmin } from '../services/notification.service';
 import { recordAudit } from '../services/audit.service';
@@ -17,6 +17,7 @@ export async function createApplication(req: Request, res: Response): Promise<vo
     coverLetter: string;
     locale: 'en' | 'ar';
   };
+  const storedName = file ? await persistUpload(file, 'cvs') : null;
 
   try {
     const created = await prisma.jobApplication.create({
@@ -29,7 +30,7 @@ export async function createApplication(req: Request, res: Response): Promise<vo
         coverLetter: body.coverLetter,
         locale: body.locale,
         cvFileName: file?.originalname.slice(0, 200) ?? null,
-        cvStoredName: file ? file.filename : null,
+        cvStoredName: storedName,
       },
     });
 
@@ -43,7 +44,7 @@ export async function createApplication(req: Request, res: Response): Promise<vo
 
     res.status(201).json({ data: { id: created.id, createdAt: created.createdAt } });
   } catch (error) {
-    if (file) await fs.unlink(file.path).catch(() => undefined);
+    await removeUpload(storedName, 'cvs');
     throw error;
   }
 }

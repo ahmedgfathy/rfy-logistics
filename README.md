@@ -87,6 +87,13 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up --build 
 
 Default production port: `http://localhost:8080` (`APP_PORT`).
 
+## Deploy to Vercel
+
+The same repository deploys as a single Vercel project (static Vite site +
+Express API function) backed by Neon Postgres and Vercel Blob. See
+[`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md) for the full setup,
+environment variables, schema migration and verification checklist.
+
 ## Project layout
 
 ```
@@ -102,6 +109,8 @@ frontend/
   src/lib/{api,seo,queries,site,form-schemas}.ts
 docker-compose.yml            # development
 docker-compose.prod.yml       # production-like
+vercel.json                   # Vercel build / rewrite configuration
+api/[...path].ts              # Express API as a Vercel Function
 docs/                         # research, architecture, API, security, content checklist
 ```
 
@@ -132,6 +141,7 @@ docs/                         # research, architecture, API, security, content c
 
 ## Documentation
 
+- `docs/VERCEL_DEPLOYMENT.md` — Vercel + Neon + Blob production deployment
 - `docs/ARCHITECTURE.md` — system design, data model, tracking integration
 - `docs/API.md` — endpoints, payloads, status codes
 - `docs/SECURITY.md` — implemented controls and remaining items
