@@ -40,7 +40,9 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
       'flex min-h-[44px] items-center gap-3 rounded-xl px-3.5 py-2.5 text-[0.86rem] font-semibold transition-colors',
-      isActive ? 'bg-brand-50 text-brand-700' : 'text-[var(--steel-600)] hover:bg-[var(--steel-50)] hover:text-[var(--navy-800)]',
+      isActive
+        ? 'bg-brand-500 text-white shadow-sm'
+        : 'text-[var(--steel-500)] hover:bg-[var(--steel-100)] hover:text-[var(--navy-800)]',
     );
 
   return (
@@ -48,13 +50,14 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
       <div className="flex">
         <aside
           className={cn(
-            'fixed inset-y-0 start-0 z-50 flex w-64 flex-col border-e border-[var(--line)] bg-white transition-transform duration-300 lg:translate-x-0',
+            'fixed inset-y-0 start-0 z-50 flex w-64 flex-col overflow-hidden border-e border-[var(--line)] bg-white transition-transform duration-300 lg:translate-x-0',
             open ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full',
           )}
         >
-          <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[rgb(var(--brand-500-rgb)/0.14)] to-transparent" aria-hidden="true" />
+          <div className="relative flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
             <Link to="/" className="flex items-center gap-2.5">
-              <BrandMark className="h-8 w-8" />
+              <BrandMark className="h-9 w-auto max-w-[7rem]" />
               <span className="flex flex-col leading-tight">
                 <span className="text-sm font-extrabold text-[var(--navy-800)]">RFY</span>
                 <span className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[var(--steel-500)]">Operations</span>
@@ -65,7 +68,7 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
             </button>
           </div>
 
-          <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          <nav className="relative flex-1 space-y-1 overflow-y-auto p-3">
             {navItems
               .filter((item) => !item.adminOnly || user.role === 'ADMIN')
               .map((item) => (
@@ -82,7 +85,7 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
               ))}
           </nav>
 
-          <div className="border-t border-[var(--line)] p-3">
+          <div className="relative border-t border-[var(--line)] p-3">
             <a
               href="/"
               target="_blank"
@@ -104,7 +107,7 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
 
         <div className="w-full lg:ps-64">
           <header
-            className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-[var(--line)] bg-white/95 px-4 backdrop-blur sm:px-6"
+            className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-[var(--line)] bg-white/95 px-4 backdrop-blur dark:shadow-[0_10px_30px_-24px_rgba(0,0,0,0.9)] sm:px-6"
           >
             <div className="flex items-center gap-3">
               <button
@@ -121,13 +124,15 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
                   {user.role === 'ADMIN' ? 'Administrator' : 'Editor'} · {user.email}</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => void logout()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] px-3 py-2 text-[0.78rem] font-semibold text-[var(--steel-600)] transition-colors hover:border-[var(--line)] hover:text-[var(--navy-800)]"
-            >
-              <LogOut className="h-3.5 w-3.5" aria-hidden="true" /> Sign out
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] px-3 py-2 text-[0.78rem] font-semibold text-[var(--steel-600)] transition-colors hover:border-[var(--line)] hover:text-[var(--navy-800)]"
+              >
+                <LogOut className="h-3.5 w-3.5" aria-hidden="true" /> Sign out
+              </button>
+            </div>
           </header>
 
           <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">{children ?? <Outlet />}</main>

@@ -122,6 +122,8 @@ docs/                         # research, architecture, API, security, content c
   service copy and visibility editing, user provisioning, audit log endpoint.
 - **Bilingual:** English and Arabic with correct RTL, logical spacing utilities and
   Arabic typography (IBM Plex Sans Arabic); content stored per language in the database.
+- **Theme:** dark-only corporate interface (charcoal + orange, Cairo typography) shared by
+  the public site and admin dashboard, inspired by the Egypt Ship visual language.
 - **SEO:** per-page titles/descriptions, canonical URLs, Open Graph/Twitter tags, JSON-LD
   (Organization, Service, Breadcrumb, FAQ, Article), `robots.txt`, `sitemap.xml`.
 - **Security:** Argon2-class cost via bcrypt(12), httpOnly + SameSite cookies, origin guard

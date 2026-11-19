@@ -33,16 +33,14 @@ export default function Home() {
     <>
       <Hero />
 
-      <section className="py-20 sm:py-24">
+      <section className="bg-[var(--surface)] py-20 sm:py-24">
         <Container>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <SectionHeading
-              eyebrow={t('home.services.eyebrow')}
-              title={t('home.services.title')}
-              description={t('home.services.description')}
-            />
-          </div>
-          <div className="mt-10">
+          <SectionHeading
+            eyebrow={t('home.services.eyebrow')}
+            title={t('home.services.title')}
+            description={t('home.services.description')}
+          />
+          <div className="mt-14">
             <ServicesGrid limit={5} />
           </div>
         </Container>

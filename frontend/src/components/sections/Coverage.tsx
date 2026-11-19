@@ -64,7 +64,7 @@ export function Coverage() {
                 return (
                   <div
                     key={mode.label}
-                    className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-soft"
+                    className="rounded-xl border border-[var(--line)] border-t-2 border-t-brand-500 bg-[var(--surface)] p-5 shadow-soft"
                   >
                     <Icon className="h-5 w-5 text-[var(--brand-600)]" aria-hidden="true" />
                     <p className="mt-3 text-sm font-bold text-[var(--navy-800)]">{mode.label}</p>

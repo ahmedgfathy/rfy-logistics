@@ -10,32 +10,45 @@ interface Props {
   as?: 'h1' | 'h2' | 'h3';
 }
 
-export function SectionHeading({ eyebrow, title, description, tone = 'light', align = 'start', className, as = 'h2' }: Props) {
+export function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  tone = 'light',
+  align = 'center',
+  className,
+  as = 'h2',
+}: Props) {
   const Tag = as;
   return (
     <div
       className={cn(
-        'max-w-2xl',
-        align === 'center' && 'mx-auto text-center',
+        'max-w-3xl',
+        align === 'center' ? 'mx-auto text-center' : 'text-start',
         className,
       )}
     >
       {eyebrow ? (
-        <p className={cn('eyebrow mb-3', tone === 'dark' && 'text-amber-400')}>{eyebrow}</p>
+        <p className={cn('eyebrow mb-3 font-bold uppercase tracking-[0.16em]', tone === 'dark' && 'text-brand-400')}>
+          {eyebrow}
+        </p>
       ) : null}
       <Tag
         className={cn(
-          'text-[1.55rem] font-extrabold leading-[1.18] tracking-tight sm:text-[2.1rem] sm:leading-[1.15]',
-          tone === 'dark' ? 'text-white' : 'text-navy-800',
+          'text-[1.65rem] font-black leading-[1.18] tracking-tight sm:text-[2.2rem]',
+          tone === 'dark' ? 'text-white' : 'text-[var(--navy-800)]',
         )}
       >
         {title}
       </Tag>
+      <span className="section-divider" aria-hidden="true">
+        <span className="h-2 w-2 rotate-45 bg-[var(--brand-500)]" />
+      </span>
       {description ? (
         <p
           className={cn(
-            'mt-3 text-[0.95rem] leading-relaxed sm:mt-4 sm:text-[0.98rem]',
-            tone === 'dark' ? 'text-steel-200/85' : 'text-steel-600',
+            'mx-auto mt-5 max-w-2xl text-[0.95rem] leading-[1.85] sm:text-[1rem]',
+            tone === 'dark' ? 'text-white/70' : 'text-[var(--steel-500)]',
           )}
         >
           {description}

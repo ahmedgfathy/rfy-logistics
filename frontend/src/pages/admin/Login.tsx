@@ -35,7 +35,7 @@ export function Login() {
       <div className="absolute inset-0 bg-grid opacity-50" aria-hidden="true" />
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex items-center gap-3">
-          <BrandMark className="h-11 w-11" />
+          <BrandMark className="h-11 w-auto max-w-[8rem]" />
           <div>
             <p className="text-lg font-extrabold text-navy-800">RFY Operations</p>
             <p className="text-xs text-steel-500">Staff access only</p>

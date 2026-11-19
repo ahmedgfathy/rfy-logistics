@@ -14,10 +14,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useServices } from '../../lib/queries';
-import { Container } from '../ui/Container';
 import { Reveal } from '../ui/Reveal';
 import { StatePanel } from '../ui/Spinner';
-import { cn } from '../../lib/utils';
 
 const iconMap: Record<string, LucideIcon> = {
   Ship,
@@ -44,9 +42,9 @@ export function ServicesGrid({ limit, showAllLink = true }: { limit?: number; sh
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2, 3, 4, 5].map((key) => (
-          <div key={key} className="h-52 animate-pulse rounded-2xl border border-[var(--line)] bg-white" />
+          <div key={key} className="h-64 animate-pulse rounded-xl border border-[var(--line)] bg-[var(--surface)]" />
         ))}
       </div>
     );
@@ -61,45 +59,64 @@ export function ServicesGrid({ limit, showAllLink = true }: { limit?: number; sh
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {visible.map((service, index) => (
         <Reveal key={service.slug} delay={index * 0.04}>
           <Link
             to={`/services/${service.slug}`}
-            className={cn(
-              'group flex h-full flex-col rounded-2xl border border-[var(--line)] bg-white p-6 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-[var(--brand)] hover:shadow-soft',
-            )}
+            className="flip-scene group block h-64 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-500"
+            aria-label={isArabic ? service.titleAr : service.titleEn}
           >
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--brand-50)] text-[var(--brand-600)] transition-colors duration-300 group-hover:bg-[var(--brand-600)] group-hover:text-white">
-              <ServiceIcon name={service.icon} className="h-5 w-5" />
-            </span>
-            <h3 className="mt-4 text-[1.05rem] font-bold text-[var(--navy-800)]">
-              {isArabic ? service.titleAr : service.titleEn}
-            </h3>
-            <p className="mt-2 flex-1 text-[0.86rem] leading-relaxed text-[var(--steel-500)]">
-              {isArabic ? service.excerptAr : service.excerptEn}
-            </p>
-            <span className="mt-5 inline-flex items-center gap-1.5 text-[0.8rem] font-bold text-[var(--brand-700)]">
-              {t('actions.learnMore')}
-              <ArrowRight className="flip-x h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true" />
-            </span>
+            <div className="flip-inner">
+              <div className="flip-face flex flex-col rounded-xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-soft transition-colors group-hover:border-brand-500">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-brand-500 text-white shadow-sm">
+                  <ServiceIcon name={service.icon} className="h-6 w-6" />
+                </span>
+                <h3 className="mt-5 text-[1.15rem] font-black leading-snug text-[var(--navy-800)]">
+                  {isArabic ? service.titleAr : service.titleEn}
+                </h3>
+                <span className="mt-auto inline-flex items-center gap-1.5 text-[0.78rem] font-bold text-brand-500">
+                  {t('actions.learnMore')}
+                  <ArrowRight className="flip-x h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+              </div>
+
+              <div className="flip-face flip-back flex flex-col justify-between rounded-xl bg-brand-500 p-6 text-white shadow-lift">
+                <div>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/15">
+                    <ServiceIcon name={service.icon} className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-4 text-[1.05rem] font-black">{isArabic ? service.titleAr : service.titleEn}</h3>
+                  <p className="mt-2 line-clamp-4 text-[0.84rem] leading-relaxed text-white/85">
+                    {isArabic ? service.excerptAr : service.excerptEn}
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-2 text-[0.8rem] font-extrabold uppercase tracking-wide">
+                  {t('actions.learnMore')}
+                  <ArrowRight className="flip-x h-4 w-4" aria-hidden="true" />
+                </span>
+              </div>
+            </div>
           </Link>
         </Reveal>
       ))}
+
       {showAllLink ? (
-        <Reveal delay={0.2} className="sm:col-span-2 lg:col-span-1">
+        <Reveal delay={0.2}>
           <Link
             to="/services"
-            className="flex h-full min-h-[13rem] flex-col justify-between rounded-2xl border border-dashed border-[var(--line)] bg-[var(--soft-100)]/70 p-6 transition-colors hover:border-[var(--brand-300)] hover:bg-[var(--brand-50)]"
+            className="group flex h-64 flex-col justify-between rounded-xl border border-dashed border-[var(--line-400)] bg-[var(--surface)] p-6 transition-all duration-300 hover:border-brand-500 hover:bg-brand-500/5"
           >
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[var(--navy-700)] shadow-soft">
-              <Boxes className="h-5 w-5" aria-hidden="true" />
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--surface-2)] text-brand-500 transition-colors group-hover:bg-brand-500 group-hover:text-white">
+              <Boxes className="h-6 w-6" aria-hidden="true" />
             </span>
             <div>
-              <p className="text-[1.05rem] font-bold text-[var(--navy-800)]">{t('actions.viewAll')}</p>
-              <p className="mt-1 text-[0.86rem] text-[var(--steel-500)]">{t('home.services.description')}</p>
+              <p className="text-[1.1rem] font-black text-[var(--navy-800)]">{t('actions.viewAll')}</p>
+              <p className="mt-2 line-clamp-3 text-[0.84rem] leading-relaxed text-[var(--steel-500)]">
+                {t('home.services.description')}
+              </p>
             </div>
-            <ArrowRight className="flip-x h-5 w-5 text-[var(--brand-600)]" aria-hidden="true" />
+            <ArrowRight className="flip-x h-5 w-5 text-brand-500" aria-hidden="true" />
           </Link>
         </Reveal>
       ) : null}
