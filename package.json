@@ -4,7 +4,7 @@
   "private": true,
   "description": "Vercel orchestration for the RFY Logistics frontend and Express API",
   "engines": {
-    "node": "20.x"
+    "node": "26.x"
   },
   "scripts": {
     "install:all": "npm --prefix frontend install && npm --prefix backend install",

@@ -138,7 +138,7 @@ docker run --rm \
   -e ADMIN_PASSWORD="your-strong-password" \
   -e ADMIN_NAME="Operations Administrator" \
   -e SEED_DEMO_DATA="false" \
-  node:20-bookworm \
+  node:26-bookworm \
   sh -c "npm install --no-audit --no-fund && npx prisma migrate deploy && npx prisma generate && npm run seed"
 ```
 
