@@ -9,8 +9,6 @@ import RequestQuote from './pages/RequestQuote';
 import TrackShipment from './pages/TrackShipment';
 import Contact from './pages/Contact';
 import Careers from './pages/Careers';
-import Insights from './pages/Insights';
-import Article from './pages/Article';
 import Faq from './pages/Faq';
 import { PrivacyPage, TermsPage } from './pages/Legal';
 import NotFound from './pages/NotFound';
@@ -29,8 +27,6 @@ export default function App() {
         <Route path="tracking" element={<TrackShipment />} />
         <Route path="contact" element={<Contact />} />
         <Route path="careers" element={<Careers />} />
-        <Route path="insights" element={<Insights />} />
-        <Route path="insights/:slug" element={<Article />} />
         <Route path="faq" element={<Faq />} />
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />

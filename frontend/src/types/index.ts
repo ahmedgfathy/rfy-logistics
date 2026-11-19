@@ -17,20 +17,6 @@ export interface Service {
   bodyAr?: string;
 }
 
-export interface NewsArticle {
-  slug: string;
-  titleEn: string;
-  titleAr: string;
-  excerptEn: string;
-  excerptAr: string;
-  bodyEn?: string;
-  bodyAr?: string;
-  category: string;
-  coverImage: string | null;
-  publishedAt: string | null;
-  author: string;
-}
-
 export type ShipmentStatus =
   | 'BOOKED'
   | 'ORIGIN_PICKUP'
@@ -187,22 +173,6 @@ export interface DashboardStats {
     createdAt: string;
   }[];
   recentContacts: { id: string; fullName: string; subject: string; status: string; createdAt: string }[];
-}
-
-export interface AdminNewsArticle {
-  id: string;
-  slug: string;
-  titleEn: string;
-  titleAr: string;
-  excerptEn: string;
-  excerptAr: string;
-  bodyEn: string;
-  bodyAr: string;
-  category: string;
-  coverImage: string | null;
-  isPublished: boolean;
-  publishedAt: string | null;
-  createdAt: string;
 }
 
 export interface AdminService extends Service {

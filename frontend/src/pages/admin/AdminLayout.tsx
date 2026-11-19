@@ -7,8 +7,8 @@ import {
   LayoutDashboard,
   LogOut,
   Mail,
+  Layers,
   Menu,
-  Newspaper,
   PackageSearch,
   Users as UsersIcon,
   X,
@@ -23,7 +23,7 @@ const navItems = [
   { to: '/admin/quotes', label: 'Quote requests', icon: Mail },
   { to: '/admin/contacts', label: 'Messages', icon: Building2 },
   { to: '/admin/shipments', label: 'Shipments', icon: PackageSearch },
-  { to: '/admin/content', label: 'Content', icon: Newspaper },
+  { to: '/admin/content', label: 'Services', icon: Layers },
   { to: '/admin/users', label: 'Users', icon: UsersIcon, adminOnly: true },
 ];
 

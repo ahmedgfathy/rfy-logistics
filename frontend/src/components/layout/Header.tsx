@@ -13,7 +13,6 @@ const navItems = [
   { to: '/about', key: 'nav.about' },
   { to: '/services', key: 'nav.services', hasMenu: true },
   { to: '/tracking', key: 'nav.tracking' },
-  { to: '/insights', key: 'nav.insights' },
   { to: '/contact', key: 'nav.contact' },
 ];
 

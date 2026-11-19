@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from './api';
-import type { NewsArticle, Service } from '../types';
+import type { Service } from '../types';
 
 export function useServices() {
   return useQuery({
@@ -14,21 +14,6 @@ export function useService(slug: string | undefined) {
     queryKey: ['service', slug],
     enabled: Boolean(slug),
     queryFn: async () => (await api.get<Service>(`/services/${slug}`)).data,
-  });
-}
-
-export function useNews() {
-  return useQuery({
-    queryKey: ['news'],
-    queryFn: async () => (await api.get<NewsArticle[]>('/news')).data,
-  });
-}
-
-export function useArticle(slug: string | undefined) {
-  return useQuery({
-    queryKey: ['news', slug],
-    enabled: Boolean(slug),
-    queryFn: async () => (await api.get<NewsArticle>(`/news/${slug}`)).data,
   });
 }
 
