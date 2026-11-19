@@ -19,14 +19,14 @@ export function Industries() {
           />
         </div>
 
-        <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-steel-200 bg-steel-200 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-[var(--line)] bg-white sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, index) => (
             <Reveal key={item} delay={index * 0.03}>
-              <div className="flex h-full items-center gap-4 bg-white px-6 py-7 transition-colors hover:bg-steel-50">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy-800/5 text-navy-700">
+              <div className="flex h-full items-center gap-4 bg-white px-6 py-7 transition-colors hover:bg-[var(--soft-100)]">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--navy-800)]/5 text-[var(--navy-700)]">
                   <Factory className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <p className="text-[0.92rem] font-semibold text-navy-800">{item}</p>
+                <p className="text-[0.92rem] font-semibold text-[var(--navy-800)]">{item}</p>
               </div>
             </Reveal>
           ))}

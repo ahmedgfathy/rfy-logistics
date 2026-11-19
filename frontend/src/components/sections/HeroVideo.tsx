@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-/**
- * Background video for the home hero.
+/** Background video for the home hero.
  * Footage: "A cargo ship loaded with containers at port" by Cyriac von Czapiewski,
  * Pexels (free license, no attribution required — credited here for the client).
  * Phones show the still frame instead, so the clip is never downloaded over mobile data.

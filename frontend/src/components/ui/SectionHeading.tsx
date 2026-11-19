@@ -25,7 +25,7 @@ export function SectionHeading({ eyebrow, title, description, tone = 'light', al
       ) : null}
       <Tag
         className={cn(
-          'text-balance text-[1.55rem] font-extrabold leading-[1.18] tracking-tight sm:text-[2.1rem] sm:leading-[1.15]',
+          'text-[1.55rem] font-extrabold leading-[1.18] tracking-tight sm:text-[2.1rem] sm:leading-[1.15]',
           tone === 'dark' ? 'text-white' : 'text-navy-800',
         )}
       >

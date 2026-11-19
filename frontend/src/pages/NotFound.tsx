@@ -17,7 +17,7 @@ export default function NotFound() {
           <Compass className="h-7 w-7" aria-hidden="true" />
         </span>
         <p className="mt-6 text-[0.72rem] font-bold uppercase tracking-[0.2em] text-brand-700">{t('notFound.eyebrow')}</p>
-        <h1 className="mt-3 text-balance text-[2.2rem] font-extrabold leading-tight text-navy-800 sm:text-[2.8rem]">{t('notFound.title')}</h1>
+        <h1 className="mt-3 text-[2.2rem] font-extrabold leading-tight text-navy-800 sm:text-[2.8rem]">{t('notFound.title')}</h1>
         <p className="mx-auto mt-4 max-w-md text-[0.95rem] leading-relaxed text-steel-600">{t('notFound.body')}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <ButtonLink to="/" iconRight={<ArrowRight className="flip-x h-4 w-4" aria-hidden="true" />}>

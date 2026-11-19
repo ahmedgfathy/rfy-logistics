@@ -52,7 +52,7 @@ export function PageHeader({
         <div className="mt-4 grid gap-6 sm:mt-6 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-8">
             {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-            <h1 className="mt-2.5 text-balance text-[1.75rem] font-extrabold leading-[1.1] tracking-tight text-navy-800 sm:mt-3 sm:text-[2.7rem] sm:leading-[1.06]">
+            <h1 className="mt-2.5 text-[1.75rem] font-extrabold leading-[1.1] tracking-tight text-navy-800 sm:mt-3 sm:text-[2.7rem] sm:leading-[1.06]">
               {title}
             </h1>
             {description ? (

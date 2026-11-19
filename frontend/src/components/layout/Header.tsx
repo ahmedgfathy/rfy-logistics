@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Languages, ArrowRight } from 'lucide-react';
+import { Languages, Globe, ArrowDown, ArrowRight } from 'lucide-react';
 import { AnnouncementBar } from './AnnouncementBar';
 import { Logo } from './Logo';
 import { ButtonLink } from '../ui/Button';
@@ -64,59 +64,80 @@ export function Header() {
           <Logo className="shrink-0" />
 
           <nav className="hidden min-w-0 items-center gap-3 lg:flex xl:gap-6" aria-label={t('nav.menu')}>
-            {navItems.map((item) =>
-              item.hasMenu ? (
-                <div key={item.to} className="group relative">
-                  <NavLink to={item.to} className={linkClass} aria-haspopup="true" end={item.end}>
-                    {t(item.key)}
-                    <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" aria-hidden="true" />
-                  </NavLink>
-                  <div className="invisible absolute start-0 top-full z-50 w-[22rem] translate-y-1 rounded-2xl border border-steel-200 bg-white p-2 opacity-0 shadow-lift transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                    <div className="grid gap-0.5">
-                      {(services ?? []).slice(0, 7).map((service) => (
-                        <Link
-                          key={service.slug}
-                          to={`/services/${service.slug}`}
-                          className="rounded-xl px-3 py-2.5 transition-colors hover:bg-steel-50"
-                        >
-                          <span className="block text-[0.84rem] font-semibold text-navy-800">
-                            {i18n.language === 'ar' ? service.titleAr : service.titleEn}
-                          </span>
-                          <span className="mt-0.5 block truncate text-xs text-steel-500">
-                            {i18n.language === 'ar' ? service.excerptAr : service.excerptEn}
-                          </span>
-                        </Link>
-                      ))}
-                      {!services?.length ? (
-                        <span className="px-3 py-2 text-xs text-steel-500">{t('states.loading')}</span>
-                      ) : null}
-                    </div>
-                    <Link
-                      to="/services"
-                      className="mt-1 flex items-center justify-between rounded-xl bg-steel-50 px-3 py-2.5 text-[0.82rem] font-bold text-brand-700 transition-colors hover:bg-brand-50"
+            {navItems.map((item) => {
+              const isMenu = item.hasMenu;
+              if (isMenu) {
+                return (
+                  <div key={item.to} className="group relative">
+                    <NavLink
+                      to={item.to}
+                      className={linkClass}
+                      aria-haspopup="true"
+                      end={item.end}
                     >
-                      {t('actions.viewAll')}
-                      <ArrowRight className="flip-x h-4 w-4" aria-hidden="true" />
-                    </Link>
+                      {t(item.key)}
+                      <ArrowDown
+                        className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180"
+                        aria-hidden="true"
+                      />
+                    </NavLink>
+                    <div
+                      className="invisible absolute start-0 top-full z-50 w-[22rem] rounded-2xl border border-steel-200 bg-white p-2 opacity-0 shadow transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                    >
+                      <div className="grid gap-0.5">
+                        {(services ?? []).slice(0, 7).map((service) => (
+                          <Link
+                            key={service.slug}
+                            to={`/services/${service.slug}`}
+                            className="rounded-xl px-3 py-2.5 transition-colors hover:bg-steel-50"
+                          >
+                            <span className="block text-[0.84rem] font-semibold text-navy-800">
+                              {i18n.language === 'ar' ? service.titleAr : service.titleEn}
+                            </span>
+                            <span className="mt-0.5 block truncate text-xs text-steel-500">
+                              {i18n.language === 'ar' ? service.excerptAr : service.excerptEn}
+                            </span>
+                          </Link>
+                        ))}
+                        {services?.length ? null : (
+                          <span className="px-3 py-2 text-xs text-steel-500">
+                            {t('states.loading')}
+                          </span>
+                        )}
+                      </div>
+                      <Link
+                        to="/services"
+                        className="mt-1 flex items-center justify-between rounded-xl bg-steel-50 px-3 py-2.5 text-[0.82rem] font-bold text-brand-700 transition-colors hover:bg-brand-50"
+                      >
+                        {t('actions.viewAll')}
+                        <ArrowRight className="flip-x h-4 w-4" aria-hidden="true" />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <NavLink key={item.to} to={item.to} className={linkClass} end={item.end}>
+                );
+              }
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={linkClass}
+                  end={item.end}
+                >
                   {t(item.key)}
                 </NavLink>
-              ),
-            )}
+              );
+            })}
           </nav>
 
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
               onClick={() => void i18n.changeLanguage(nextLanguage)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-steel-200 text-navy-700 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-steel-200 text-navy-700 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
               aria-label={nextLanguage === 'ar' ? 'التبديل إلى العربية' : 'Switch to English'}
               title={nextLanguage === 'ar' ? 'العربية' : 'English'}
             >
-              <Languages className="h-[18px] w-[18px]" aria-hidden="true" />
+              <Languages className="h-[17px] w-[17px]" aria-hidden="true" />
             </button>
 
             <ButtonLink
