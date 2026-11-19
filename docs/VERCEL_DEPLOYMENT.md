@@ -23,13 +23,16 @@ PostgreSQL from the app's point of view.
 
 - **Neon:** create a project, enable connection pooling, and copy the **pooled**
   connection string (hostname contains `-pooler`).
-- **Prisma Postgres:** Vercel injects `DATABASE_URL` as an accelerated
-  `prisma://...` URL. The backend detects that and automatically uses the
-  `DIRECT_URL` (`postgresql://...`) value from the integration. If `DIRECT_URL`
-  is not injected, copy the **direct** connection string from the Prisma console
-  into `DATABASE_URL` yourself.
+- **Prisma Postgres:** the Vercel integration injects several variables. The
+  backend automatically prefers `DATABASE_URL_POOLED` (host
+  `pooled.db.prisma.io`) for runtime queries, so no manual override is needed.
+  The other injected variables (`DATABASE_URL`, `POSTGRES_URL`,
+  `PRISMA_DATABASE_URL`) point at the direct endpoint and are used for
+  migrations. If the integration ever injects an accelerated `prisma://...`
+  value, the backend falls back to `DIRECT_URL`.
 
-A plain `postgresql://...` value in `DATABASE_URL` is always the safest choice.
+A plain `postgres://` / `postgresql://` value is what the app expects — never a
+`prisma://...` URL.
 
 ---
 
@@ -99,7 +102,8 @@ app keeps writing to `UPLOAD_DIR` as before.
 
 | Variable | Example / notes |
 | --- | --- |
-| `DATABASE_URL` | `postgresql://...` — Neon pooled or Prisma Postgres direct URL |
+| `DATABASE_URL` | required plain `postgres://...` connection string |
+| `DATABASE_URL_POOLED` | preferred at runtime (injected by Prisma Postgres integration) |
 | `DIRECT_URL` | only when Prisma Postgres sets `DATABASE_URL` to `prisma://...` |
 | `JWT_SECRET` | `openssl rand -hex 32` — at least 32 characters |
 | `JWT_EXPIRES_IN` | `8h` |
@@ -160,6 +164,67 @@ password — reset it in the database or use a new email.
 - Quote with attachment → visible in admin quote detail; attachment downloads.
 - Careers application with a CV is stored.
 - `/admin/login` → dashboard sidebar visible; admin cookie survives a refresh.
+
+---
+
+## 7. GitHub CI/CD
+
+### Continuous deployment (Vercel)
+
+Both Vercel projects are connected to `ahmedgfathy/rfy-logistics` on `main`, so
+**every push to `main` automatically deploys** — no extra GitHub Action is
+needed. Each project only deploys when changes land in its own Root Directory
+(`backend/` or `frontend/`).
+
+| Project | Root Directory | Install | Build | Output |
+| --- | --- | --- | --- | --- |
+| backend | `backend` | `npm install` | `npm run build` | function at `api/[...path].ts` |
+| frontend | `frontend` | `npm install` | `npm run build` | `dist` |
+
+### Continuous integration (GitHub Actions)
+
+- `.github/workflows/ci.yml` runs on PRs and pushes to `main`: installs with
+  `npm ci`, validates the Prisma schema, builds both packages, and builds both
+  Docker images without pushing them. This is the same validation that
+  Docker Desktop performs locally.
+- `.github/workflows/database.yml` applies `prisma migrate deploy` and seeds
+  when Prisma files change, or when you run it manually with **Run workflow**.
+
+Add these GitHub repository secrets (**Settings → Secrets and variables →
+Actions**) for the database workflow:
+
+| Secret | Value |
+| --- | --- |
+| `DATABASE_URL_DIRECT` | the **direct** Prisma/Neon connection string (never the pooled one) |
+| `JWT_SECRET` | same value as in Vercel (≥ 32 characters) |
+| `ADMIN_EMAIL` | administrator login email |
+| `ADMIN_PASSWORD` | strong administrator password |
+
+Optional repository variable: `ADMIN_NAME` (default `Operations Administrator`).
+
+> Never put connection strings or tokens in `vercel.json`, workflow files, or
+> any committed file. They belong only in Vercel/GitHub secret storage.
+
+### Local development with Docker Desktop
+
+`docker-compose.yml` still uses the bundled local Postgres, so local work is
+independent of the production database:
+
+```bash
+docker compose up --build
+```
+
+To point the local backend at the hosted Prisma/Neon database instead, put the
+connection strings in an untracked `.env` at the repo root and override the
+backend database variables:
+
+```bash
+DATABASE_URL=<direct-or-pooled-connection-string> \
+DATABASE_URL_POOLED=<pooled-connection-string> \
+docker compose --profile tools up --build
+```
+
+`DATABASE_URL_POOLED` is optional locally; the app falls back to `DATABASE_URL`.
 
 ---
 

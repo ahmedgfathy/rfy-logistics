@@ -1,0 +1,54 @@
+name: Prisma database
+
+# Applies migrations and seeds the admin/service catalogue. Safe to re-run:
+# migrations are idempotent, seed uses upsert and only creates a missing admin.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/prisma/**'
+      - '.github/workflows/database.yml'
+
+concurrency:
+  group: prisma-database
+  cancel-in-progress: false
+
+jobs:
+  migrate-and-seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm --prefix backend ci
+
+      - name: Apply migrations
+        working-directory: backend
+        env:
+          # Use the DIRECT (non-pooled) connection string for DDL in secrets.
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: npx prisma migrate deploy
+
+      - name: Generate Prisma client
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: npx prisma generate
+
+      - name: Seed administrator and service catalogue
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          ADMIN_NAME: ${{ vars.ADMIN_NAME || 'Operations Administrator' }}
+          SEED_DEMO_DATA: 'false'
+        run: npm run seed

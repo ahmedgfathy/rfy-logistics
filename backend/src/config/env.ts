@@ -5,9 +5,12 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-  // Vercel's Prisma Postgres integration injects an accelerated `prisma://`
-  // URL as DATABASE_URL. A plain PrismaClient cannot use it, so when the
-  // integration also provides DIRECT_URL we connect with that instead.
+  // Vercel's Prisma Postgres integration injects several connection strings.
+  // Prefer its pooled endpoint at runtime: every serverless invocation opens
+  // its own Prisma connection and would otherwise exhaust the DB limit.
+  DATABASE_URL_POOLED: z.string().optional(),
+  // When DATABASE_URL is an accelerated `prisma://` URL, a plain PrismaClient
+  // cannot use it, so fall back to the direct URL the integration also injects.
   DIRECT_URL: z.string().optional(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters long'),
   JWT_EXPIRES_IN: z.string().default('8h'),
@@ -35,10 +38,11 @@ if (!parsed.success) {
 }
 
 const data = parsed.data;
-const databaseUrl =
+const directUrl =
   data.DATABASE_URL.startsWith('prisma://') && data.DIRECT_URL
     ? data.DIRECT_URL
     : data.DATABASE_URL;
+const databaseUrl = data.DATABASE_URL_POOLED || directUrl;
 
 export const env = { ...data, DATABASE_URL: databaseUrl };
 
