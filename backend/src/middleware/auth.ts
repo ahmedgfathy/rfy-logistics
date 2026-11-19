@@ -31,7 +31,7 @@ export function signSessionToken(user: AuthUser): string {
 export function setSessionCookie(res: Response, token: string): void {
   res.cookie(AUTH_COOKIE, token, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     secure: isProduction,
     maxAge: 8 * 60 * 60 * 1000,
     path: '/',
@@ -39,7 +39,7 @@ export function setSessionCookie(res: Response, token: string): void {
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(AUTH_COOKIE, { httpOnly: true, sameSite: 'lax', secure: isProduction, path: '/' });
+  res.clearCookie(AUTH_COOKIE, { httpOnly: true, sameSite: isProduction ? 'none' : 'lax', secure: isProduction, path: '/' });
 }
 
 function extractToken(req: Request): string | null {

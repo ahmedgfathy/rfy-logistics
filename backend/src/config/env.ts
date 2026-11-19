@@ -5,6 +5,10 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  // Vercel's Prisma Postgres integration injects an accelerated `prisma://`
+  // URL as DATABASE_URL. A plain PrismaClient cannot use it, so when the
+  // integration also provides DIRECT_URL we connect with that instead.
+  DIRECT_URL: z.string().optional(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters long'),
   JWT_EXPIRES_IN: z.string().default('8h'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
@@ -30,7 +34,13 @@ if (!parsed.success) {
   process.exit(1);
 }
 
-export const env = parsed.data;
+const data = parsed.data;
+const databaseUrl =
+  data.DATABASE_URL.startsWith('prisma://') && data.DIRECT_URL
+    ? data.DIRECT_URL
+    : data.DATABASE_URL;
+
+export const env = { ...data, DATABASE_URL: databaseUrl };
 
 export const isProduction = env.NODE_ENV === 'production';
 export const isDemoSeedEnabled = env.SEED_DEMO_DATA !== 'false';

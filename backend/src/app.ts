@@ -20,7 +20,7 @@ export function createApp() {
   app.use(
     helmet({
       contentSecurityPolicy: false, // API only; the frontend sets its own policy
-      crossOriginResourcePolicy: { policy: 'same-site' },
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
   );
 
