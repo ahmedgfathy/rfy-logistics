@@ -51,7 +51,9 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
         <aside
           className={cn(
             'fixed inset-y-0 start-0 z-50 flex w-64 flex-col overflow-hidden border-e border-[var(--line)] bg-white transition-transform duration-300 lg:translate-x-0',
-            open ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full',
+            open
+              ? 'translate-x-0'
+              : 'max-lg:ltr:-translate-x-full max-lg:rtl:translate-x-full',
           )}
         >
           <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[rgb(var(--brand-500-rgb)/0.14)] to-transparent" aria-hidden="true" />
