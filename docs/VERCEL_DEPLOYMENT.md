@@ -29,7 +29,11 @@ Keeping the API on the same origin as the frontend means the existing
 
 1. In Vercel, **Add New → Project** and import
    `https://github.com/ahmedgfathy/rfy-logistics.git`.
-2. Use branch `main`, **Root Directory** `.` (the repository root).
+2. Use branch `main`, **Root Directory** `.` (the repository root). This is
+   critical: Vercel often auto-detects the Vite app and preselects `frontend`.
+   If the root is `frontend`, the install command runs from the wrong folder and
+   fails with `Missing script: "install:all"`. Change it under
+   **Project Settings → General → Root Directory** and save before deploying.
 3. Framework preset: **Other**. The settings come from `vercel.json`:
    - Install: `npm install && npm run install:all`
    - Build: `npm run build:all`
@@ -120,6 +124,15 @@ idempotent and safe to re-run.
   `CORS_ORIGIN` and `PUBLIC_SITE_URL` and redeploy.
 
 ---
+
+## Troubleshooting
+
+- `Missing script: "install:all"` during the Vercel install step → Root Directory
+  is `frontend` instead of the repository root. Fix it in
+  **Settings → General → Root Directory**, then redeploy.
+- `Prisma Client did not initialize yet` in runtime logs → make sure the build
+  completed `npm --prefix backend run build` (which runs `prisma generate`) and
+  that `DATABASE_URL` is set for the function.
 
 ## Known limitations
 
