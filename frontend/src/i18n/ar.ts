@@ -17,6 +17,7 @@ const ar: TranslationDictionary = {
     menu: 'القائمة',
     close: 'إغلاق',
     admin: 'لوحة التحكم',
+    employeeLogin: 'دخول الموظفين',
   },
   announce: {
     text: 'تستورد من الخارج؟ نتولى التسجيل المسبق ACI والتخليص الجمركي والتوصيل كخدمة واحدة.',

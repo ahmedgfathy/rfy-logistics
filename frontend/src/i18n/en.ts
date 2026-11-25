@@ -15,6 +15,7 @@ const en = {
     menu: 'Menu',
     close: 'Close',
     admin: 'Admin',
+    employeeLogin: 'Employee login',
   },
   announce: {
     text: 'Importing into Egypt? ACI pre-registration, customs clearance and delivery handled as one service.',

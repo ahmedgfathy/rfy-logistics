@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowDown, ArrowRight, Globe2 } from 'lucide-react';
+import { ArrowDown, ArrowRight, Globe2, UserRound } from 'lucide-react';
 import { AnnouncementBar } from './AnnouncementBar';
 import { Logo } from './Logo';
 import { ButtonLink } from '../ui/Button';
@@ -155,8 +155,22 @@ export function Header() {
               </NavLink>
             ))}
           </nav>
-
           <div className="ms-auto flex shrink-0 items-center gap-2 lg:ms-0">
+            <Link
+              to="/admin/login"
+              aria-label={t('nav.employeeLogin')}
+              title={t('nav.employeeLogin')}
+              className={cn(
+                'inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors sm:h-10 sm:w-10',
+                overHero
+                  ? 'border-white/30 bg-white/10 text-white hover:bg-white/20'
+                  : 'border-[var(--line)] bg-[var(--surface)] text-[var(--navy-800)] hover:border-[var(--brand-500)] hover:text-[var(--brand-500)]',
+              )}
+            >
+              <UserRound className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">{t('nav.employeeLogin')}</span>
+            </Link>
+
             <button
               type="button"
               onClick={() => void i18n.changeLanguage(nextLanguage)}
