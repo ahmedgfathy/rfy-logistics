@@ -86,3 +86,8 @@ export function createApp() {
 
   return app;
 }
+
+// Vercel's Express preset loads this module as the serverless entry point and
+// requires a callable default export. Express apps are (req, res) handlers, so
+// the instance created here is what the platform invokes.
+export default createApp();
