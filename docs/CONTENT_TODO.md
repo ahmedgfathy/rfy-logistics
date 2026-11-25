@@ -36,7 +36,7 @@ factual company information.
 | Address (EN/AR) | 14 El Horreya Avenue, Alexandria | `lib/site.ts`, seed |
 | Business hours | Sat–Thu, 08:30–17:00 | `lib/site.ts`, seed |
 | Offices | Alexandria + Cairo | `lib/site.ts` |
-| LinkedIn | linkedin.com | `lib/site.ts` |
+| Social profiles | Generic platform homepages for Facebook, Instagram, YouTube, LinkedIn and X; replace with verified RFY profile URLs | `lib/site.ts` |
 | Google Maps | not embedded | `pages/Contact.tsx` (placeholder card) |
 
 ## Deliberately absent (do not invent)

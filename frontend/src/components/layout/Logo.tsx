@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 
-/** The client-supplied company logo (root `logo.jpeg`, copied into public/images). */
+/** Transparent vector wordmark for the RFY brand. */
 export function BrandMark({ className }: { className?: string }) {
   return (
     <img
-      src="/images/logo.jpeg"
+      src="/images/rfy-logo.svg"
       alt="RFY"
       className={cn(
-        'h-10 w-auto max-w-[8.5rem] rounded-md bg-white object-contain p-0.5 shadow-sm',
+        'h-11 w-auto max-w-[8.5rem] object-contain',
         className,
       )}
     />
@@ -26,8 +26,8 @@ export function Logo({ tone = 'light', className }: { tone?: 'light' | 'dark'; c
     >
       <BrandMark
         className={cn(
-          'transition-transform duration-300 group-hover:-translate-y-0.5',
-          tone === 'dark' && 'ring-1 ring-white/25',
+          'transition-[filter,transform] duration-300 group-hover:-translate-y-0.5',
+          tone === 'dark' && 'brightness-0 invert',
         )}
       />
     </Link>
