@@ -21,6 +21,10 @@ export const SITE = {
   ports: ['Alexandria', 'El Dekheila', 'Damietta', 'Port Said', 'Sokhna', 'Adabiya', 'Safaga', 'Cairo Airport'],
   social: {
     linkedin: 'https://www.linkedin.com/',
+    facebook: 'https://www.facebook.com/',
+    instagram: 'https://www.instagram.com/',
+    youtube: 'https://www.youtube.com/',
+    x: 'https://x.com/',
   },
 } as const;
 
