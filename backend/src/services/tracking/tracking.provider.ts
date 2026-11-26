@@ -48,8 +48,8 @@ class DatabaseTrackingProvider implements TrackingProvider {
   readonly name = 'database';
 
   async lookup(trackingNumber: string): Promise<TrackingResult | null> {
-    const shipment = await prisma.shipment.findUnique({
-      where: { trackingNumber: trackingNumber.toUpperCase() },
+    const shipment = await prisma.shipment.findFirst({
+      where: { trackingNumber: trackingNumber.toUpperCase(), isPublic: true },
       include: { events: { orderBy: { occurredAt: 'desc' } } },
     });
     if (!shipment) return null;

@@ -19,20 +19,23 @@ independently.
 ## 1. Create the PostgreSQL database
 
 You can use Neon or Vercel's **Prisma Postgres** integration — both are plain
-PostgreSQL from the app's point of view.
+PostgreSQL from the app's point of view. Configure both runtime and migration
+connections:
 
-- **Neon:** create a project, enable connection pooling, and copy the **pooled**
-  connection string (hostname contains `-pooler`).
-- **Prisma Postgres:** the Vercel integration injects several variables. The
-  backend automatically prefers `DATABASE_URL_POOLED` (host
-  `pooled.db.prisma.io`) for runtime queries, so no manual override is needed.
-  The other injected variables (`DATABASE_URL`, `POSTGRES_URL`,
-  `PRISMA_DATABASE_URL`) point at the direct endpoint and are used for
-  migrations. If the integration ever injects an accelerated `prisma://...`
-  value, the backend falls back to `DIRECT_URL`.
+- **Neon:** enable connection pooling, use the **pooled** connection string for
+  runtime queries (hostname contains `-pooler`), and use the **direct**
+  connection string for `DIRECT_URL`.
+- **Prisma Postgres:** the integration injects several variables. The backend
+  automatically prefers `DATABASE_URL_POOLED` (host `pooled.db.prisma.io`) for
+  runtime queries. Set `DIRECT_URL` explicitly to the direct PostgreSQL endpoint
+  if the integration does not provide a usable one; the other injected variables
+  (`DATABASE_URL`, `POSTGRES_URL`, `PRISMA_DATABASE_URL`) may point there.
 
-A plain `postgres://` / `postgresql://` value is what the app expects — never a
-`prisma://...` URL.
+`DIRECT_URL` is required because Prisma validates the schema with a
+`directUrl` datasource during the build and uses it for migrations. Set
+`DATABASE_URL` to a plain PostgreSQL string as well; never use a `prisma://...`
+value. If runtime pooling is unavailable, use the direct URL for
+`DATABASE_URL`, while keeping `DIRECT_URL` set.
 
 ---
 
@@ -79,20 +82,25 @@ A plain `postgres://` / `postgresql://` value is what the app expects — never 
 
 ---
 
-## 3. Connect Vercel Blob (quote attachments and CVs)
+## 3. Connect Vercel Blob (quote attachments, CVs, and ERP documents)
 
 Vercel Functions have an ephemeral filesystem, so local disk uploads cannot be
-used in production.
+used in production. Quote attachments, career CVs, and ERP document-vault files
+all use the same private storage service.
 
 1. In the **backend** project, open **Storage → Create Database → Blob**, choose
-   **Private**, and connect it to Production (and Preview if needed).
+   **Private**, and connect it to Production (and Preview if needed). In the
+   one-project topology, create it there too because that project runs the API.
 2. The connection injects `BLOB_STORE_ID` + `VERCEL_OIDC_TOKEN`, which the SDK
    uses automatically. Alternatively enable **read-write token env var** for
    `BLOB_READ_WRITE_TOKEN`.
 3. Redeploy so the function sees the new variables.
 
-Local Docker development needs no Blob configuration: with no credentials the
-app keeps writing to `UPLOAD_DIR` as before.
+Production on Vercel fails closed without Blob credentials, including when
+`STORAGE_DRIVER=local` is selected, because the function filesystem is not
+durable. Local Docker development needs no Blob configuration: with
+`STORAGE_DRIVER=local`, the app writes to `UPLOAD_DIR`. Never expose raw private
+Blob URLs; authenticated API routes serve downloads.
 
 ---
 
@@ -104,13 +112,14 @@ app keeps writing to `UPLOAD_DIR` as before.
 | --- | --- |
 | `DATABASE_URL` | required plain `postgres://...` connection string |
 | `DATABASE_URL_POOLED` | preferred at runtime (injected by Prisma Postgres integration) |
-| `DIRECT_URL` | only when Prisma Postgres sets `DATABASE_URL` to `prisma://...` |
+| `DIRECT_URL` | **required** direct plain `postgres://...` URL for validation/migrations |
 | `JWT_SECRET` | `openssl rand -hex 32` — at least 32 characters |
 | `JWT_EXPIRES_IN` | `8h` |
 | `NODE_ENV` | `production` |
 | `CORS_ORIGIN` | **frontend** origin, e.g. `https://rfy.vercel.app` (comma-separate extras) |
 | `PUBLIC_SITE_URL` | **frontend** origin |
 | `UPLOAD_DIR` | `/tmp/uploads` (fallback only; Blob is used in production) |
+| `STORAGE_DRIVER` | `auto`; Vercel requires Blob credentials and rejects local disk |
 | `MAX_UPLOAD_MB` | `4` — stay under the Vercel request-body limit |
 | `SEED_DEMO_DATA` | `false` in production |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | used by the one-time seed command |
@@ -131,28 +140,36 @@ sends `credentials: 'include'`.
 ## 5. Apply the schema and create the admin user
 
 New databases are empty. Run this once from a machine with Docker, using the
-**same** `DATABASE_URL` and `JWT_SECRET` as Vercel:
+**same** `JWT_SECRET` as Vercel and the direct database connection:
 
 ```bash
 docker run --rm \
   -v "C:/rfy/backend:/app" -w /app \
-  -e DATABASE_URL="postgresql://..." \
+  -e DATABASE_URL="postgresql://direct-user:password@direct-host/db?sslmode=require" \
+  -e DIRECT_URL="postgresql://direct-user:password@direct-host/db?sslmode=require" \
   -e JWT_SECRET="same-32-character-secret-as-vercel" \
   -e ADMIN_EMAIL="admin@your-domain.com" \
   -e ADMIN_PASSWORD="your-strong-password" \
   -e ADMIN_NAME="Operations Administrator" \
   -e SEED_DEMO_DATA="false" \
-  node:26-bookworm \
+  node:24-bookworm \
   sh -c "npm install --no-audit --no-fund && npx prisma migrate deploy && npx prisma generate && npm run seed"
 ```
 
 On Windows PowerShell use backticks (`` ` ``) for line continuations. On
 macOS/Linux replace `C:/rfy/backend` with the absolute path to `backend`.
 
-`migrate deploy` applies `backend/prisma/migrations/20260101000000_init`.
-`seed` creates the administrator and the bilingual service catalogue. Both are
-idempotent. If the admin email already exists, seed will **not** change its
-password — reset it in the database or use a new email.
+`migrate deploy` applies all migrations, including the original schema and
+`backend/prisma/migrations/20261126000000_erp`. The idempotent seed creates the
+administrator, bilingual service catalogue, RFY company/branch, permissions and
+roles, chart of accounts, accounting journals/periods, tax/charge references,
+number sequences, and HS reference codes. If the admin email already exists,
+seed will **not** change its password — reset it in the database or use a new
+email.
+
+Do not use `prisma db push` in production. Docker startup also applies
+migrations and seeds only when `RUN_SEED=true`; keep that disabled in a normal
+production deployment after the one-time initialization.
 
 ---
 
@@ -164,6 +181,15 @@ password — reset it in the database or use a new email.
 - Quote with attachment → visible in admin quote detail; attachment downloads.
 - Careers application with a CV is stored.
 - `/admin/login` → dashboard sidebar visible; admin cookie survives a refresh.
+- Authenticated ERP reads work at `/api/v1/erp/dashboard`,
+  `/api/v1/erp/partners`, and `/api/v1/erp/customs/hs-codes`.
+- `/admin/erp/accounting` opens without console errors; trial balance reports
+  `balanced: true` and invoices, bills, receipts, and payments retain their
+  state after refresh.
+- A private ERP document upload downloads through its authenticated API route;
+  no raw Blob URL is exposed.
+- Finance workflow rejects posting into a locked fiscal period and rejects
+  over-allocation of an invoice or bill.
 
 ---
 
@@ -171,10 +197,12 @@ password — reset it in the database or use a new email.
 
 ### Continuous deployment (Vercel)
 
-Both Vercel projects are connected to `ahmedgfathy/rfy-logistics` on `main`, so
+When Vercel projects are connected to `ahmedgfathy/rfy-logistics` on `main`,
 **every push to `main` automatically deploys** — no extra GitHub Action is
-needed. Each project only deploys when changes land in its own Root Directory
-(`backend/` or `frontend/`).
+needed. With two projects, each project only deploys when changes land in its own
+Root Directory (`backend/` or `frontend/`); root-level shared configuration or
+API changes may require a redeploy of both projects. The one-project topology
+deploys the complete application together.
 
 | Project | Root Directory | Install | Build | Output |
 | --- | --- | --- | --- | --- |
@@ -235,9 +263,16 @@ docker compose --profile tools up --build
   to `npm install` in **Settings → General → Build & Development Settings**.
 - `Prisma Client did not initialize yet` → confirm `npm run build` ran
   `prisma generate`, and that `DATABASE_URL` is set for the function.
-- `Prisma Accelerate only works with...` / `prisma://` errors → set
-  `DATABASE_URL` to the `postgresql://` connection string (or provide
-  `DIRECT_URL`).
+- Prisma validation/build fails with missing `DIRECT_URL` → add a direct plain
+  PostgreSQL connection string to the backend environment (and to CI).
+- `Prisma Accelerate only works with...` / `prisma://` errors → set both
+  `DATABASE_URL` and `DIRECT_URL` to plain `postgresql://` connection strings;
+  runtime queries should use a pooled endpoint when available.
+- ERP pages return 404 → confirm the API is running the current build and that
+  `/api/v1/erp` is reachable; redeploy after applying the ERP migration and seed.
+- An upload fails with a durable-storage error → connect a private Blob store to
+  the project running the API, then redeploy. Local disk is not durable on
+  Vercel Functions.
 - Admin login succeeds but redirects back to login → cookie is not being sent.
   Check `CORS_ORIGIN` contains the exact frontend origin and that `NODE_ENV=production`
   is set on the backend (for `SameSite=None; Secure`).

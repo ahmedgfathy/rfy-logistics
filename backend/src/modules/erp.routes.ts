@@ -1,0 +1,21 @@
+import { Router } from 'express';
+import { accountingRoutes } from './accounting/accounting.routes';
+import { customsRoutes } from './customs/customs.routes';
+import { dashboardRoutes } from './dashboard/dashboard.routes';
+import { documentRoutes } from './documents/documents.routes';
+import { operationsRoutes } from './operations/operations.routes';
+import { partnerRoutes } from './partners/partners.routes';
+import { salesBookingRoutes } from './sales/bookings.routes';
+import { salesQuoteRoutes } from './sales/quotes.routes';
+import { taskRoutes } from './tasks/tasks.routes';
+
+export const erpRoutes = Router();
+erpRoutes.use('/dashboard', dashboardRoutes);
+erpRoutes.use('/accounting', accountingRoutes);
+erpRoutes.use('/partners', partnerRoutes);
+erpRoutes.use('/quotes', salesQuoteRoutes);
+erpRoutes.use('/bookings', salesBookingRoutes);
+erpRoutes.use('/customs', customsRoutes);
+erpRoutes.use('/documents', documentRoutes);
+erpRoutes.use('/tasks', taskRoutes);
+erpRoutes.use('/', operationsRoutes);

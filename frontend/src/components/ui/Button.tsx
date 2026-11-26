@@ -30,6 +30,7 @@ interface CommonProps {
 export function Button({
   variant = 'primary',
   size = 'md',
+  type = 'button',
   className,
   children,
   icon,
@@ -37,7 +38,7 @@ export function Button({
   ...rest
 }: CommonProps & ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button className={cn(variantClass[variant], sizeClass[size], className)} {...rest}>
+    <button type={type} className={cn(variantClass[variant], sizeClass[size], className)} {...rest}>
       {icon}
       <span>{children}</span>
       {iconRight}

@@ -57,10 +57,9 @@ export function Shipments() {
         weightKg: form.weightKg ? Number(form.weightKg) : undefined,
         etd: form.etd ? new Date(`${form.etd}T00:00:00Z`).toISOString() : undefined,
         eta: form.eta ? new Date(`${form.eta}T00:00:00Z`).toISOString() : undefined,
-        isDemo: true,
       }),
     onSuccess: async () => {
-      setFeedback('Shipment created. It is marked as demonstration data until you disable the demo flag in the database.');
+      setFeedback('Shipment created as a real operational record.');
       setForm({ ...emptyShipment });
       setShowCreate(false);
       await queryClient.invalidateQueries({ queryKey: ['admin', 'shipments'] });

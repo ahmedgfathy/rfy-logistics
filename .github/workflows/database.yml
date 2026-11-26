@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 26
+          node-version: 24
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
@@ -34,18 +34,21 @@ jobs:
         env:
           # Use the DIRECT (non-pooled) connection string for DDL in secrets.
           DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+          DIRECT_URL: ${{ secrets.DATABASE_URL_DIRECT }}
         run: npx prisma migrate deploy
 
       - name: Generate Prisma client
         working-directory: backend
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+          DIRECT_URL: ${{ secrets.DATABASE_URL_DIRECT }}
         run: npx prisma generate
 
       - name: Seed administrator and service catalogue
         working-directory: backend
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+          DIRECT_URL: ${{ secrets.DATABASE_URL_DIRECT }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}

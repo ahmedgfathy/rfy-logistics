@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma';
 import { env } from '../config/env';
 import { logger } from '../lib/logger';
+import { seedErpReferenceData } from './erp-seed';
 
 interface ServiceSeed {
   slug: string;
@@ -270,15 +271,18 @@ async function main(): Promise<void> {
     await prisma.companySetting.upsert({ where: { key }, update: {}, create: { key, value } });
   }
 
+  await seedErpReferenceData();
+
   if (env.SEED_DEMO_DATA !== 'false') {
     for (const shipment of demoShipments) {
       const { events, ...record } = shipment;
       await prisma.shipment.upsert({
         where: { trackingNumber: record.trackingNumber },
-        update: {},
+        update: { isPublic: env.NODE_ENV === 'development' },
         create: {
           ...record,
           isDemo: true,
+          isPublic: env.NODE_ENV === 'development',
           events: { create: events },
         },
       });

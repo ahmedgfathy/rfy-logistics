@@ -73,7 +73,7 @@ export function TrackingPanel() {
           </div>
         </Field>
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-steel-500">
-          <button
+          {import.meta.env.DEV ? <button
             type="button"
             onClick={() => {
               setValue('DEMO-SEA-1001');
@@ -83,7 +83,7 @@ export function TrackingPanel() {
             className="inline-flex min-h-[36px] items-center rounded-md bg-amber-500/10 px-2.5 py-1.5 font-semibold text-amber-700 transition-colors hover:bg-amber-500/20"
           >
             {t('trackingPage.demoHint')}: DEMO-SEA-1001
-          </button>
+          </button> : null}
           <span>{t('trackingPage.privacyNote')}</span>
         </div>
       </form>

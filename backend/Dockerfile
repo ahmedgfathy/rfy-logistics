@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1
 
 # ---------- dependencies ----------
-FROM node:20-bookworm-slim AS deps
+FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 # Prisma's schema engine requires OpenSSL; the slim image does not ship it.
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
-COPY package.json ./
-RUN npm install --no-audit --no-fund
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 COPY prisma ./prisma
 RUN npx prisma generate
 
@@ -27,7 +27,7 @@ COPY . .
 RUN npm run build
 
 # ---------- production ----------
-FROM node:20-bookworm-slim AS production
+FROM node:24-bookworm-slim AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -35,8 +35,8 @@ RUN apt-get update -y \
     && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json ./
-RUN npm install --omit=dev --no-audit --no-fund
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
 
 COPY prisma ./prisma
 RUN npx prisma generate

@@ -22,15 +22,15 @@ socket.on('error', () => process.exit(1));
   sleep 2
 done
 
-if [ -d "/app/prisma/migrations" ] && [ -n "$(ls -A /app/prisma/migrations 2>/dev/null)" ]; then
-  echo "[entrypoint] applying migrations"
-  npx prisma migrate deploy || { echo "[entrypoint] migrate deploy failed"; exit 1; }
-else
-  echo "[entrypoint] no migration files found - syncing schema with db push"
-  npx prisma db push --skip-generate || { echo "[entrypoint] db push failed"; exit 1; }
+if [ ! -d "/app/prisma/migrations" ] || [ -z "$(ls -A /app/prisma/migrations 2>/dev/null)" ]; then
+  echo "[entrypoint] no migrations found; refusing to alter the database with db push" >&2
+  exit 1
 fi
 
-if [ "${RUN_SEED:-true}" = "true" ]; then
+echo "[entrypoint] applying migrations"
+npx prisma migrate deploy || { echo "[entrypoint] migrate deploy failed"; exit 1; }
+
+if [ "${RUN_SEED:-false}" = "true" ]; then
   echo "[entrypoint] seeding reference data"
   if [ -f "dist/db/seed.js" ]; then
     node dist/db/seed.js || echo "[entrypoint] seed failed (non-fatal)"

@@ -1,4 +1,4 @@
-# RFY Logistics — corporate website & operations dashboard
+# RFY Logistics — website, shipping operations & ERP
 
 A full-stack freight forwarding website for an Egyptian forwarder and customs broker:
 public marketing site (EN/AR, RTL), quotation workflow, shipment tracking, private admin
@@ -17,7 +17,7 @@ dashboard, Express API, PostgreSQL database, all running in Docker Compose.
 | Layer | Technology |
 | --- | --- |
 | Frontend | React 18, TypeScript, Vite 5, React Router 6, TanStack Query, Tailwind CSS, Framer Motion, Lucide, React Hook Form + Zod, i18next (en/ar) |
-| Backend | Node.js 20, Express 4, TypeScript, Prisma 5, PostgreSQL 16, Zod, JWT (httpOnly cookie), helmet, express-rate-limit, multer |
+| Backend | Node.js 24, Express 4, TypeScript, Prisma 5, PostgreSQL 16, Zod, JWT (httpOnly cookie), helmet, express-rate-limit, multer |
 | Infra | Docker Compose (dev + prod), nginx for the production frontend, named volumes for data and uploads |
 
 ## Requirements
@@ -49,9 +49,10 @@ password: ChangeMe!2026
 
 **Change these before any shared or public deployment.**
 
-First boot automatically waits for PostgreSQL, applies the schema, seeds the administrator,
-the nine-service catalogue, company settings, and three clearly labelled demonstration
-shipments (`DEMO-SEA-1001`, `DEMO-AIR-1002`, `DEMO-ROAD-1003`).
+First boot automatically waits for PostgreSQL and applies migrations. Set `RUN_SEED=true` to
+seed the administrator, service catalogue, company settings, ERP reference data and optional
+demonstration shipments. Demo shipments are disabled by default; enable them only with
+`SEED_DEMO_DATA=true`.
 
 ## Everyday commands
 
@@ -128,14 +129,22 @@ docs/                         # research, architecture, API, security, content c
 - **Contact / careers:** stored submissions with CV upload for applications.
 - **Admin:** dashboard statistics, quote workflow with seven statuses and internal notes,
   message inbox, shipment records with milestone creation, news drafting/publishing,
-  service copy and visibility editing, user provisioning, audit log endpoint.
+  service copy and visibility editing, user provisioning and audit logs.
+- **ERP:** customer/vendor masters, commercial quotes and bookings, shipment operations,
+  cargo/vendor costs, documents, tasks, Egypt ACI/Nafeza records, customs declarations,
+  HS references and landed-cost estimates.
+- **Finance:** invoices, vendor bills, receipts/payments and allocations, manual and opening
+  journals, balanced general ledger, fiscal periods, bank reconciliation, trial balance, P&L,
+  receivables and payables.
+- **Controls:** granular permissions, transactional audit records, Decimal-safe calculations,
+  idempotent financial writes and locked-period enforcement.
 - **Bilingual:** English and Arabic with correct RTL, logical spacing utilities and
   Arabic typography (IBM Plex Sans Arabic); content stored per language in the database.
 - **Theme:** dark-only corporate interface (charcoal + orange, Cairo typography) shared by
   the public site and admin dashboard, inspired by the Egypt Ship visual language.
 - **SEO:** per-page titles/descriptions, canonical URLs, Open Graph/Twitter tags, JSON-LD
   (Organization, Service, Breadcrumb, FAQ, Article), `robots.txt`, `sitemap.xml`.
-- **Security:** Argon2-class cost via bcrypt(12), httpOnly + SameSite cookies, origin guard
+- **Security:** bcrypt(12) password hashing, httpOnly + SameSite cookies, origin guard
   on mutations, strict CORS allowlist, rate limits per route class, upload type/size limits,
   private document storage, audit logging, no secrets in code.
 
@@ -145,7 +154,6 @@ docs/                         # research, architecture, API, security, content c
 - `docs/ARCHITECTURE.md` — system design, data model, tracking integration
 - `docs/API.md` — endpoints, payloads, status codes
 - `docs/SECURITY.md` — implemented controls and remaining items
-- `docs/TESTING.md` — what was executed and what remains unverified
 - `docs/COMPETITOR_RESEARCH.md` — reference analysis
 - `docs/CONTENT_TODO.md` — placeholder content that must be replaced
 
@@ -155,8 +163,12 @@ docs/                         # research, architecture, API, security, content c
   emitted as a structured log line / optional webhook (`NOTIFY_WEBHOOK_URL`).
 - **No live carrier API.** Tracking reads operationally recorded milestones; the provider
   interface is in place for a real integration.
-- **No automated test suite.** Verification performed for this build is documented in
-  `docs/TESTING.md`; there are no unit or end-to-end tests yet.
+- **Automated coverage is focused.** Unit tests cover money/customs calculations; authenticated
+  smoke scripts exercise the operational and accounting workflows against a running API.
+- **Customs remains manual-first.** ACI/Nafeza references are recorded in the ERP; no live
+  government submission or authoritative tariff service is connected.
+- **Accounting is base-currency only.** FX, draft editing and bank-statement import are not
+  yet exposed; manual GENERAL/OPENING journals and their reversals are supported.
 - **Arabic translation** covers all site copy, but should be reviewed by the client’s own
   Arabic copywriter for trade terminology.
 - Placeholder contact details, no testimonials, no partner logos, no company statistics.

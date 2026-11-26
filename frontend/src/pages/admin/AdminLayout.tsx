@@ -11,20 +11,71 @@ import {
   Menu,
   PackageSearch,
   Users as UsersIcon,
+  Handshake,
+  FileText,
+  CalendarCheck2,
+  FolderOpen,
+  ListTodo,
+  ReceiptText,
+  WalletCards,
+  BookOpen,
+  Landmark,
   X,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { AdminUser } from '../../types';
 import { BrandMark } from '../../components/layout/Logo';
 import { cn } from '../../lib/utils';
 
-const navItems = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/admin/quotes', label: 'Quote requests', icon: Mail },
-  { to: '/admin/contacts', label: 'Messages', icon: Building2 },
-  { to: '/admin/shipments', label: 'Shipments', icon: PackageSearch },
-  { to: '/admin/content', label: 'Services', icon: Layers },
-  { to: '/admin/users', label: 'Users', icon: UsersIcon, adminOnly: true },
+type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean; adminOnly?: boolean };
+
+const navGroups: Array<{ label: string; items: NavItem[] }> = [
+  {
+    label: 'Overview',
+    items: [
+      { to: '/admin', label: 'Website dashboard', icon: LayoutDashboard, end: true },
+      { to: '/admin/erp', label: 'ERP overview', icon: Building2, end: true },
+    ],
+  },
+  {
+    label: 'Sales',
+    items: [
+      { to: '/admin/erp/partners', label: 'Customers & vendors', icon: Handshake },
+      { to: '/admin/erp/quotes', label: 'Commercial quotes', icon: FileText },
+      { to: '/admin/erp/bookings', label: 'Bookings', icon: CalendarCheck2 },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { to: '/admin/erp/shipments', label: 'Shipment workspace', icon: PackageSearch },
+      { to: '/admin/erp/customs', label: 'Customs & ACI', icon: Layers },
+      { to: '/admin/erp/documents', label: 'Documents', icon: FolderOpen },
+      { to: '/admin/erp/tasks', label: 'Tasks', icon: ListTodo },
+    ],
+  },
+  {
+    label: 'Finance',
+    items: [
+      { to: '/admin/erp/invoices', label: 'Invoices', icon: ReceiptText },
+      { to: '/admin/erp/bills', label: 'Vendor bills', icon: WalletCards },
+      { to: '/admin/erp/payments', label: 'Payments & receipts', icon: Landmark },
+      { to: '/admin/erp/accounting', label: 'Accounting', icon: BookOpen },
+    ],
+  },
+  {
+    label: 'Website',
+    items: [
+      { to: '/admin/quotes', label: 'Quote requests', icon: Mail },
+      { to: '/admin/contacts', label: 'Messages', icon: Building2 },
+      { to: '/admin/content', label: 'Services', icon: Layers },
+    ],
+  },
+  {
+    label: 'System',
+    items: [{ to: '/admin/users', label: 'Users', icon: UsersIcon, adminOnly: true }],
+  },
 ];
 
 export function AdminLayout({ user, children }: { user: AdminUser; children: React.ReactNode }) {
@@ -70,21 +121,26 @@ export function AdminLayout({ user, children }: { user: AdminUser; children: Rea
             </button>
           </div>
 
-          <nav className="relative flex-1 space-y-1 overflow-y-auto p-3">
-            {navItems
-              .filter((item) => !item.adminOnly || user.role === 'ADMIN')
-              .map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  className={linkClass}
-                  onClick={() => setOpen(false)}
-                >
-                  <item.icon className="h-4 w-4" aria-hidden="true" />
-                  {item.label}
-                </NavLink>
-              ))}
+          <nav className="relative flex-1 space-y-4 overflow-y-auto p-3">
+            {navGroups.map((group) => (
+              <div key={group.label} className="space-y-1">
+                <p className="px-3 pb-1 pt-2 text-[0.6rem] font-extrabold uppercase tracking-[0.16em] text-steel-400">{group.label}</p>
+                {group.items
+                  .filter((item) => !('adminOnly' in item && item.adminOnly) || user.role === 'ADMIN')
+                  .map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={'end' in item ? item.end : undefined}
+                      className={linkClass}
+                      onClick={() => setOpen(false)}
+                    >
+                      <item.icon className="h-4 w-4" aria-hidden="true" />
+                      {item.label}
+                    </NavLink>
+                  ))}
+              </div>
+            ))}
           </nav>
 
           <div className="relative border-t border-[var(--line)] p-3">

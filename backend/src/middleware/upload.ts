@@ -34,3 +34,9 @@ export const cvUpload = multer({
   fileFilter,
   limits: { fileSize: env.MAX_UPLOAD_MB * 1024 * 1024, files: 1 },
 });
+
+export const documentUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter,
+  limits: { fileSize: env.MAX_UPLOAD_MB * 1024 * 1024, files: 1 },
+});

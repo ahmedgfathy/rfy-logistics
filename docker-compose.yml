@@ -33,6 +33,8 @@ services:
       NODE_ENV: development
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-marsa}:${POSTGRES_PASSWORD:-marsa_dev_password_change_me}@postgres:5432/${POSTGRES_DB:-marsa_logistics}?schema=public
+      DIRECT_URL: postgresql://${POSTGRES_USER:-marsa}:${POSTGRES_PASSWORD:-marsa_dev_password_change_me}@postgres:5432/${POSTGRES_DB:-marsa_logistics}?schema=public
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-32-characters-min}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
@@ -40,7 +42,7 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@marsa-demo.local}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeMe!2026}
       ADMIN_NAME: ${ADMIN_NAME:-Operations Administrator}
-      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
       UPLOAD_DIR: /app/uploads
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-8}
       RUN_SEED: ${RUN_SEED:-true}

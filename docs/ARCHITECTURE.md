@@ -41,8 +41,11 @@ Browser (Windows)
 Public route map: `/`, `/about`, `/services`, `/services/:slug`, `/quote`, `/tracking`,
 `/contact`, `/careers`, `/insights`, `/insights/:slug`, `/faq`, `/privacy`, `/terms`, `*`.
 
-Admin route map: `/admin/login`, `/admin` (dashboard), `/admin/quotes`, `/admin/quotes/:id`,
-`/admin/contacts`, `/admin/shipments`, `/admin/content`, `/admin/users` (ADMIN only).
+Admin route map: `/admin/login`, `/admin` (website dashboard), `/admin/erp`,
+`/admin/erp/partners`, `/admin/erp/quotes`, `/admin/erp/bookings`, `/admin/erp/shipments`,
+`/admin/erp/customs`, `/admin/erp/documents`, `/admin/erp/tasks`, `/admin/erp/invoices`,
+`/admin/erp/bills`, `/admin/erp/payments`, `/admin/erp/accounting`, plus the original website
+quote, contact, shipment, content and user-administration screens.
 
 ## Backend
 
@@ -51,17 +54,24 @@ Layers: `routes` → `middleware` (validate / auth / rate limit / upload) → `c
 
 - **Errors**: one `ApiError` type, one handler; Prisma `P2002`/`P2025` mapped to 409/404;
   production responses never leak stack traces.
-- **Validation**: Zod schemas in `src/validators/schemas.ts`; multipart fields are coerced
-  (strings → numbers/dates) and rejected with 422 + field errors.
+- **Validation**: Zod schemas in `src/validators/schemas.ts` and per-module `*.schemas.ts`;
+  multipart fields are coerced (strings → numbers/dates) and rejected with 422 + field errors.
+- **ERP modules**: `src/modules/{partners,sales,operations,customs,documents,tasks,accounting,dashboard}`
+  are mounted below `/api/v1/erp`; shared money, numbering, idempotency, company and audit helpers
+  keep module boundaries consistent.
 - **Versioning**: everything is mounted under `/api/v1`.
 - **Health**: `GET /api/v1/health` probes `SELECT 1` and reports `degraded` (503) when the
   database is unreachable — used by both Docker healthchecks.
 
 ## Data model (Prisma)
 
-`User` (role ADMIN|EDITOR) · `Permission` · `CompanySetting` · `Service` (bilingual body +
-features) · `QuoteRequest` + `QuoteAttachment` · `ContactMessage` · `Shipment` +
-`ShipmentEvent` · `NewsArticle` · `Testimonial` · `Partner` · `JobApplication` · `AuditLog`.
+The original website models remain (`User`, `CompanySetting`, `Service`, `QuoteRequest`,
+`ContactMessage`, `Shipment`, `ShipmentEvent`, `NewsArticle`, `Testimonial`, `Partner`,
+`JobApplication`, `AuditLog`). The ERP adds `Company`, `Branch`, `BusinessPartner`, roles and
+permissions, commercial `Quote`/`Booking`, cargo packages/containers/vendor costs, `Document`,
+`Task`, `CustomsFile`/`AciFiling`/`CustomsDeclaration`, `Invoice`/`Bill`/`Payment`,
+`Account`/`Journal`/`JournalEntry`, fiscal years/periods, bank reconciliation, number sequences
+and idempotency records.
 
 Design decisions:
 
@@ -70,7 +80,15 @@ Design decisions:
   only streamed through an authenticated route.
 - Composite indexes on the fields the dashboard filters on (`status + createdAt`).
 - `Decimal` for weight/volume so freight figures are not float-rounded.
-- `Shipment.isDemo` marks seeded records; the public UI discloses them explicitly.
+- `Shipment.isDemo` marks optional seeded records and defaults to `false`; the public UI discloses
+  demo records explicitly.
+- Financial amounts use `Decimal`; posted journals are immutable and voids create reversing entries.
+  Manual postings are limited to GENERAL/OPENING journals; system-generated entries must be
+  reversed through their source documents. Reconciled manual lines must be unmatched first.
+- Company-level financial write serialization, row locks and idempotency keys prevent duplicate
+  postings and make retries deterministic.
+- ACI filings and customs declarations have separate lifecycles; declaration release requires
+  full payment. No live Nafeza submission is implied.
 - `Testimonial.isApproved` / `Partner.isApproved` default to `false`, so nothing unapproved
   can appear on the site.
 
@@ -95,6 +113,6 @@ POSTs the event. No email provider is wired in yet; the function is the single s
 | Service | Dev target | Prod target |
 | --- | --- | --- |
 | postgres | port 5432 published | not published |
-| backend | `tsx watch`, source bind-mounted, `migrate deploy`/`db push` + idempotent seed on boot | compiled `dist/`, non-root `node` user, healthcheck |
+| backend | `tsx watch`, source bind-mounted, `migrate deploy`; optional seed via `RUN_SEED=true` | compiled `dist/`, non-root `node` user, migration-aware entrypoint, healthcheck |
 | frontend | Vite dev server with `/api` proxy | static build served by nginx, `/api` proxied to `backend:3000` |
 | pgadmin | profile `tools`, port 5050 | — |

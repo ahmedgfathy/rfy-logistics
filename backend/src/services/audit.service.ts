@@ -11,7 +11,20 @@ interface AuditInput {
   ip?: string | null;
 }
 
-/** Audit logging must never break the business operation it describes. */
+export async function recordAuditTx(tx: Prisma.TransactionClient, input: AuditInput): Promise<void> {
+  await tx.auditLog.create({
+    data: {
+      userId: input.userId ?? null,
+      action: input.action,
+      entity: input.entity,
+      entityId: input.entityId ?? null,
+      metadata: input.metadata,
+      ip: input.ip ?? null,
+    },
+  });
+}
+
+/** Audit logging must never break legacy operations; ERP financial writes use recordAuditTx. */
 export async function recordAudit(input: AuditInput): Promise<void> {
   try {
     await prisma.auditLog.create({

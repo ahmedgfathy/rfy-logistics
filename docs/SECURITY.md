@@ -8,7 +8,8 @@
 | Generic login error (no account enumeration) + constant comparison path | `auth.controller.ts` |
 | JWT signed with a >=32-character secret (validated at boot, process exits on failure) | `config/env.ts` |
 | Session in httpOnly, SameSite=Lax cookie; `Secure` in production | `middleware/auth.ts` |
-| Role-based authorization (ADMIN / EDITOR); user management + audit log are ADMIN-only | `middleware/auth.ts`, `routes/admin.routes.ts` |
+| Role-based authorization (ADMIN / EDITOR) plus granular ERP permissions; ADMIN bypasses granular checks | `middleware/auth.ts`, ERP module routes |
+| User management + audit log are ADMIN-only | `routes/admin.routes.ts` |
 | Foreign-origin rejection for state-changing requests | `app.ts` |
 | Strict CORS allowlist with credentials | `app.ts` |
 | Helmet security headers; `x-powered-by` disabled | `app.ts` |
@@ -18,7 +19,10 @@
 | Upload restriction: MIME allowlist (PDF/PNG/JPEG/WEBP/DOCX/XLSX), 8 MB default, 3 files max, randomised stored filename | `middleware/upload.ts` |
 | Customer documents never served statically; streamed only via an authenticated route with an ownership-scoped query | `quote.controller.ts#downloadAttachment` |
 | Path traversal protection (`path.basename` before joining the upload directory) | `quote.controller.ts` |
-| Audit log for login, logout, quote/contact status changes, shipment creation and events, user creation, content changes | `services/audit.service.ts` |
+| Transactional audit records for ERP and financial mutations, alongside login/content/website activity | `services/audit.service.ts`, `modules/accounting/accounting.shared.ts` |
+| Idempotency keys with request fingerprinting for financial writes and quote conversion | `lib/idempotency.ts`, `modules/accounting/accounting.shared.ts` |
+| Company-scoped queries, row locks and locked-period enforcement for financial integrity | `modules/accounting/*` |
+| Private Vercel Blob storage with authenticated downloads; production Vercel fails closed without durable storage | `lib/storage.ts`, `modules/documents/documents.controller.ts` |
 | No secret in code or git: `.env` ignored, `.env.example` contains no real credentials | `.gitignore`, `.env.example` |
 | Non-root container user in the production backend image | `backend/Dockerfile` |
 | Database not published in the production compose file | `docker-compose.prod.yml` |
@@ -45,7 +49,15 @@
    internal team.
 9. **Rotate the seeded admin password** and delete unused accounts. There is no
    self-service password reset yet.
-10. **Set `SEED_DEMO_DATA=false`** in production so demonstration shipments are not created.
+10. **Set `SEED_DEMO_DATA=false`** in production and enable `RUN_SEED=true` only for intentional
+    reference-data initialisation.
+11. **Configure both `DATABASE_URL` and `DIRECT_URL`** on Vercel/CI. Runtime should use the pooled
+    URL; migrations and Prisma generation require the direct URL.
+12. **Review remaining dependency advisories.** Same-major Vite/PostCSS and `tsx` updates are
+    applied. Audits from 2026-11-26 still report four high-severity Zod findings in the backend
+    (including the Blob SDK's transitive copy) and seven frontend findings (two high, five moderate)
+    affecting Zod, Vite/esbuild, i18next, and React Router. Resolving them requires coordinated
+    major-version upgrades and regression testing.
 
 ## Known gaps
 
@@ -53,3 +65,6 @@
 - No account lockout after repeated failed logins beyond the IP rate limit — a distributed
   attacker is only slowed, not stopped.
 - The audit log is written but has no retention/export policy yet.
+- Financial writes are serialized per company for correctness; high-volume deployments should
+  move to finer-grained locking or a dedicated accounting worker.
+- No live ACI/Nafeza submission, malware scanning, 2FA or bank-statement import is implemented.

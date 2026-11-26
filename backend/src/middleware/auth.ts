@@ -87,6 +87,22 @@ export function requireRole(...roles: Role[]): RequestHandler {
   };
 }
 
+export function requirePermission(...required: string[]): RequestHandler {
+  return async (req, _res, next) => {
+    const user = (req as AuthenticatedRequest).user;
+    if (!user) return next(ApiError.unauthorized());
+    if (user.role === 'ADMIN') return next();
+
+    const roles = await prisma.userAccessRole.findMany({
+      where: { userId: user.id },
+      select: { role: { select: { permissions: { select: { permission: { select: { key: true } } } } } } },
+    });
+    const granted = new Set(roles.flatMap((row) => row.role.permissions.map((item) => item.permission.key)));
+    if (!required.some((permission) => granted.has(permission))) return next(ApiError.forbidden());
+    return next();
+  };
+}
+
 export function currentUser(req: Request): AuthUser {
   const user = (req as AuthenticatedRequest).user;
   if (!user) throw ApiError.unauthorized();

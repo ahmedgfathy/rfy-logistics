@@ -6,7 +6,7 @@ import { Readable } from 'node:stream';
 import { del, get, put } from '@vercel/blob';
 import { env } from '../config/env';
 
-export type UploadFolder = 'quotes' | 'cvs';
+export type UploadFolder = 'quotes' | 'cvs' | 'documents';
 
 interface StoredUpload {
   stream: Readable;
@@ -19,10 +19,23 @@ interface StoredUpload {
  * original local-disk behaviour so Docker Compose development still works.
  */
 function useBlob(): boolean {
-  return Boolean(
+  if (env.STORAGE_DRIVER === 'blob') return true;
+  if (env.STORAGE_DRIVER === 'local') {
+    if (env.NODE_ENV === 'production' && process.env.VERCEL) {
+      throw new Error('Local storage is not durable on Vercel. Configure Vercel Blob or STORAGE_DRIVER=blob.');
+    }
+    return false;
+  }
+
+  const hasBlobCredentials = Boolean(
     process.env.BLOB_READ_WRITE_TOKEN ||
       (process.env.BLOB_STORE_ID && process.env.VERCEL_OIDC_TOKEN),
   );
+  if (hasBlobCredentials) return true;
+  if (env.NODE_ENV === 'production' && process.env.VERCEL) {
+    throw new Error('Durable storage is required on Vercel. Configure Vercel Blob or STORAGE_DRIVER=blob.');
+  }
+  return false;
 }
 
 function isBlobReference(storedName: string): boolean {

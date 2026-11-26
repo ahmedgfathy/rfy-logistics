@@ -58,10 +58,11 @@ export interface Envelope<T> {
 
 export const api = {
   get: <T>(path: string) => request<Envelope<T>>(path),
-  post: <T>(path: string, body?: unknown) =>
-    request<Envelope<T>>(path, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) }),
-  postForm: <T>(path: string, form: FormData) => request<Envelope<T>>(path, { method: 'POST', body: form }),
-  patch: <T>(path: string, body: unknown) =>
-    request<Envelope<T>>(path, { method: 'PATCH', body: JSON.stringify(body) }),
-  delete: <T>(path: string) => request<Envelope<T>>(path, { method: 'DELETE' }),
+  post: <T>(path: string, body?: unknown, headers?: HeadersInit) =>
+    request<Envelope<T>>(path, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body), headers }),
+  postForm: <T>(path: string, form: FormData, headers?: HeadersInit) =>
+    request<Envelope<T>>(path, { method: 'POST', body: form, headers }),
+  patch: <T>(path: string, body: unknown, headers?: HeadersInit) =>
+    request<Envelope<T>>(path, { method: 'PATCH', body: JSON.stringify(body), headers }),
+  delete: <T>(path: string, headers?: HeadersInit) => request<Envelope<T>>(path, { method: 'DELETE', headers }),
 };

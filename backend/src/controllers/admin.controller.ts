@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../middleware/error';
 import { currentUser } from '../middleware/auth';
+import { env } from '../config/env';
 import { recordAudit } from '../services/audit.service';
 import { parsePagination, paginationMeta } from '../utils/pagination';
 
@@ -98,7 +99,7 @@ export async function createShipment(req: Request, res: Response): Promise<void>
     etd: (body.etd as Date) ?? null,
     eta: (body.eta as Date) ?? null,
     lastLocation: (body.lastLocation as string) ?? null,
-    isDemo: (body.isDemo as boolean) ?? true,
+    isDemo: env.NODE_ENV === 'development' && body.isDemo === true,
   };
 
   const existing = await prisma.shipment.findUnique({ where: { trackingNumber: data.trackingNumber } });

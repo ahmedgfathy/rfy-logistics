@@ -34,6 +34,8 @@ services:
       NODE_ENV: production
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      DIRECT_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
       CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN is required}
@@ -44,7 +46,7 @@ services:
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
       UPLOAD_DIR: /app/uploads
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-8}
-      RUN_SEED: "true"
+      RUN_SEED: ${RUN_SEED:-false}
     volumes:
       - uploads_prod:/app/uploads
     healthcheck:
